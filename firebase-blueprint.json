@@ -11,9 +11,6 @@
         "photoURL": { "type": "string" },
         "taxRate": { "type": "number", "description": "Estimated tax rate for the user" },
         "tiktokHandle": { "type": "string" },
-        "tiktokAccessToken": { "type": "string" },
-        "tiktokRefreshToken": { "type": "string" },
-        "tiktokTokenExpiry": { "type": "number" },
         "onboarded": { "type": "boolean" },
         "customExpenseCategories": { "type": "array", "items": { "type": "string" } },
         "createdAt": { "type": "string", "format": "date-time" }

@@ -26,9 +26,6 @@ export interface UserProfile {
   photoURL: string;
   taxRate?: number;
   tiktokHandle?: string;
-  tiktokAccessToken?: string;
-  tiktokRefreshToken?: string;
-  tiktokTokenExpiry?: number;
   onboarded?: boolean;
   customExpenseCategories?: string[];
   createdAt: string;

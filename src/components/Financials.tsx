@@ -19,8 +19,7 @@ import {
   PieChart,
   ShoppingBag,
   LayoutDashboard,
-  TrendingDown,
-  RefreshCcw
+  TrendingDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -82,8 +81,6 @@ export const Financials: React.FC<FinancialsProps> = ({ onUpdate }) => {
 
   const currentWeekId = getCurrentWeekId();
 
-  const [syncing, setSyncing] = useState(false);
-
   const fetchData = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -105,11 +102,9 @@ export const Financials: React.FC<FinancialsProps> = ({ onUpdate }) => {
         getDocs(query(collection(db, budgetsPath), where('userId', '==', user.uid)))
       ]);
 
-      const logsData = (logSnap as any).docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as DailyLog));
-      setDailyLogs(logsData);
       setExpenses((expSnap as any).docs.map((doc: any) => ({ id: doc.id, ...doc.data(), date: doc.data().date?.toDate() } as Expense)));
-      const profileData = (profileSnap as any).data() as UserProfile;
-      setProfile(profileData);
+      setDailyLogs((logSnap as any).docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as DailyLog)));
+      setProfile((profileSnap as any).data() as UserProfile);
       setProducts((prodSnap as any).docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Product)));
       setIncomeEntries((incSnap as any).docs.map((doc: any) => ({ id: doc.id, ...doc.data(), date: doc.data().date?.toDate() } as IncomeEntry)));
       setWeeklyBudgets((budSnap as any).docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as WeeklyBudget)));
@@ -119,75 +114,6 @@ export const Financials: React.FC<FinancialsProps> = ({ onUpdate }) => {
       setLoading(false);
     }
   };
-
-  const syncTikTokData = async () => {
-    if (!profile?.tiktokAccessToken) {
-      const res = await fetch('/api/tiktok/auth');
-      const { url } = await res.json();
-      window.open(url, 'tiktok_oauth', 'width=600,height=700');
-      return;
-    }
-
-    setSyncing(true);
-    try {
-      const res = await fetch('/api/tiktok/fetch-metrics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessToken: profile.tiktokAccessToken })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-
-      const today = new Date().toISOString().split('T')[0];
-      const todayLog = dailyLogs.find(l => l.date === today);
-      
-      const updatedIncome = {
-        ...todayLog?.income,
-        affiliate: (todayLog?.income?.affiliate || 0) + (data.sales?.[0]?.amount || 0)
-      };
-
-      const updatedMetrics = {
-        ...todayLog?.metrics,
-        views: (todayLog?.metrics?.views || 0) + data.videos.reduce((sum: number, v: any) => sum + (v.view_count || 0), 0),
-        gmv: (todayLog?.metrics?.gmv || 0) + (data.sales?.[0]?.amount || 0),
-        videosPosted: data.videos.length
-      };
-
-      const logId = todayLog?.id || doc(collection(db, 'daily_logs')).id;
-      await setDoc(doc(db, 'daily_logs', logId), {
-        userId: profile.uid,
-        date: today,
-        income: updatedIncome,
-        metrics: updatedMetrics,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-
-      alert('TikTok Revenue Synced!');
-      fetchData();
-    } catch (err: any) {
-      alert('Sync failed: ' + err.message);
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleMessage = async (event: MessageEvent) => {
-      if (event.data?.type === 'TIKTOK_AUTH_SUCCESS') {
-        const { tokens } = event.data;
-        const user = auth.currentUser;
-        if (!user) return;
-        await setDoc(doc(db, 'users', user.uid), {
-          tiktokAccessToken: tokens.access_token,
-          tiktokRefreshToken: tokens.refresh_token,
-          tiktokTokenExpiry: Date.now() + (tokens.expires_in * 1000)
-        }, { merge: true });
-        fetchData();
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [profile]);
 
   useEffect(() => {
     fetchData();
@@ -315,32 +241,22 @@ export const Financials: React.FC<FinancialsProps> = ({ onUpdate }) => {
           <h2 className="text-3xl font-bold font-serif tracking-tight text-ink-900 italic underline decoration-pink-200 underline-offset-8 decoration-4">Income Hub</h2>
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-pink-400 mt-2">Official Strategic Digital OS // Financial Command</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={syncTikTokData}
-            disabled={syncing}
-            className={`flex items-center gap-2 px-4 py-2 bg-neutral-950 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-800 transition-all ${syncing ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <RefreshCcw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : profile?.tiktokAccessToken ? 'Sync TikTok' : 'Connect TikTok'}
-          </button>
-          <div className="flex gap-2 bg-cream-50 p-1.5 rounded-2xl border border-pink-50">
-            {[
-              { id: 'overview', icon: LayoutDashboard, label: 'Audit' },
-              { id: 'income', icon: ArrowUpRight, label: 'Sales' },
-              { id: 'ledger', icon: Receipt, label: 'Write-offs' },
-              { id: 'budget', icon: Target, label: 'Budget' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-pink-500 text-white shadow-lg shadow-pink-100' : 'text-ink-400 hover:text-pink-500 hover:bg-white'}`}
-              >
-                <tab.icon className="w-3 h-3" />
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        <div className="flex gap-2 bg-cream-50 p-1.5 rounded-2xl border border-pink-50">
+          {[
+            { id: 'overview', icon: LayoutDashboard, label: 'Audit' },
+            { id: 'income', icon: ArrowUpRight, label: 'Sales' },
+            { id: 'ledger', icon: Receipt, label: 'Write-offs' },
+            { id: 'budget', icon: Target, label: 'Budget' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-pink-500 text-white shadow-lg shadow-pink-100' : 'text-ink-400 hover:text-pink-500 hover:bg-white'}`}
+            >
+              <tab.icon className="w-3 h-3" />
+              {tab.label}
+            </button>
+          ))}
         </div>
       </header>
 
