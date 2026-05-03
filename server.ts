@@ -59,9 +59,9 @@ async function startServer() {
   });
 
   // TikTok Site Verification
-  app.get(['/tiktok-developers-site-verification.txt', '/tiktok-developers-site-verification'], (req, res) => {
+  app.get('/tiktok-developers-site-verification.txt', (req, res) => {
     res.type('text/plain');
-    res.send('tiktok-developers-site-verification=gx6OutO9gjlnTejxDI87p3lHgdzDqH8I');
+    res.send('tiktok-developers-site-verification=1RN88Y3Wh7B90WgPOIfEfLcB2e6TbSB4');
   });
 
   // State management for CSRF (In a real app, use a session or database)
