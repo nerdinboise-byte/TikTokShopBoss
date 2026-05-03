@@ -1,0 +1,232 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User account and preference data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "taxRate": { "type": "number", "description": "Estimated tax rate for the user" },
+        "tiktokHandle": { "type": "string" },
+        "tiktokAccessToken": { "type": "string" },
+        "tiktokRefreshToken": { "type": "string" },
+        "tiktokTokenExpiry": { "type": "number" },
+        "onboarded": { "type": "boolean" },
+        "customExpenseCategories": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "GoalSet": {
+      "title": "30-Day Goals",
+      "description": "User goals for the period",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "month": { "type": "string" },
+        "gmvGoal": { "type": "number" },
+        "commissionGoal": { "type": "number" },
+        "videosTarget": { "type": "number" },
+        "topGoals": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "DailyLog": {
+      "title": "Daily Tracker",
+      "description": "Combined financial and content tracking for a specific day",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "income": {
+          "type": "object",
+          "properties": {
+            "affiliate": { "type": "number" },
+            "rewards": { "type": "number" },
+            "live": { "type": "number" },
+            "brandDeals": { "type": "number" },
+            "other": { "type": "number" }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "videosPosted": { "type": "number" },
+            "livesCompleted": { "type": "number" },
+            "views": { "type": "number" },
+            "a2c": { "type": "number" },
+            "gmv": { "type": "number" }
+          }
+        },
+        "mileage": { "type": "number" }
+      }
+    },
+    "BrandDeal": {
+      "title": "Brand Deal",
+      "description": "Tracking for brand collaborations and fees",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "brandName": { "type": "string" },
+        "productName": { "type": "string" },
+        "dealType": { "type": "string" },
+        "fee": { "type": "number" },
+        "deadline": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["pitched", "negotiating", "signed", "content_posted", "paid"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "brandName", "fee"]
+    },
+    "ContentPiece": {
+      "title": "Content Piece",
+      "description": "A piece of generated content including drafts for multiple platforms",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "idea": { "type": "string" },
+        "tone": { "type": "string" },
+        "linkedin": { "type": "string" },
+        "twitter": { "type": "string" },
+        "instagram": { "type": "string" },
+        "script": { "type": "string", "description": "TikTok Script" },
+        "images": { 
+          "type": "object",
+          "properties": {
+            "linkedin": { "type": "string" },
+            "twitter": { "type": "string" },
+            "instagram": { "type": "string" }
+          }
+        },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "idea", "createdAt"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Business expense for tax tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "receiptUrl": { "type": "string" }
+      },
+      "required": ["userId", "amount", "category", "date"]
+    },
+    "Budget": {
+      "title": "Budget",
+      "description": "Monthly budget settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "month": { "type": "string", "description": "YYYY-MM" },
+        "limit": { "type": "number" },
+        "spent": { "type": "number" }
+      },
+      "required": ["userId", "month", "limit"]
+    },
+    "WeeklyReview": {
+      "title": "Weekly Review",
+      "description": "Weekly performance reflection and planning",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "wins": { "type": "string" },
+        "numbers": { "type": "string" },
+        "lessons": { "type": "string" },
+        "nextWeekPlan": { "type": "string" },
+        "weekEnding": { "type": "string", "format": "date-time" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "timestamp"]
+    },
+    "Product": {
+      "title": "Product Catalog",
+      "description": "Products being promoted or researched",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "brand": { "type": "string" },
+        "link": { "type": "string" },
+        "description": { "type": "string" },
+        "targetAudience": { "type": "string" },
+        "workup": { "type": "string", "description": "AI generated pains/solutions summary" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name"]
+    },
+    "Script": {
+      "title": "Content Script",
+      "description": "AI generated or manual scripts for products",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "productId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "hooks": { "type": "array", "items": { "type": "object" } },
+        "type": { "type": "string" },
+        "hashtags": { "type": "array", "items": { "type": "string" } },
+        "caption": { "type": "string" },
+        "scheduledDate": { "type": "string", "format": "date" },
+        "savedToArchive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "productId", "content"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile documents"
+    },
+    "/content/{contentId}": {
+      "schema": "ContentPiece",
+      "description": "Generated content pieces"
+    },
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Expense entries"
+    },
+    "/budgets/{budgetId}": {
+      "schema": "Budget",
+      "description": "Monthly budgets"
+    },
+    "/brand_deals/{dealId}": {
+      "schema": "BrandDeal",
+      "description": "Brand collaboration deals"
+    },
+    "/daily_logs/{logId}": {
+      "schema": "DailyLog",
+      "description": "Daily activity and financial logs"
+    },
+    "/goals/{userId}": {
+      "schema": "GoalSet",
+      "description": "User performance goals"
+    },
+    "/weekly_reviews/{reviewId}": {
+      "schema": "WeeklyReview",
+      "description": "Weekly reviews"
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Product catalog"
+    },
+    "/scripts/{scriptId}": {
+      "schema": "Script",
+      "description": "Script archive and schedule"
+    }
+  }
+}

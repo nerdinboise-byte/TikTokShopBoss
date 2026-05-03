@@ -1,0 +1,61 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=boska@500,700,700i&display=swap');
+
+@theme {
+  --font-sans: "General Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Boska", serif;
+
+  --color-pink-50: #fff0f7;
+  --color-pink-100: #ffd9ec;
+  --color-pink-200: #ffb3d9;
+  --color-pink-300: #ff7fbf;
+  --color-pink-400: #ff4da8;
+  --color-pink-500: #ec1e85;
+  --color-pink-600: #c91570;
+  --color-pink-700: #9d0f57;
+  --color-pink-800: #6f0b3e;
+
+  --color-cream-50: #fffaf3;
+  --color-cream-100: #fff5e9;
+  --color-cream-200: #fbe9d8;
+
+  --color-ink-900: #1f1420;
+  --color-ink-800: #2d1f2e;
+  --color-ink-700: #3f2e40;
+  --color-ink-500: #6b5a6c;
+  --color-ink-400: #8f7f90;
+  --color-ink-300: #b7a9b8;
+  --color-ink-200: #e7dce8;
+  --color-ink-100: #f3ecf3;
+}
+
+@layer base {
+  body {
+    @apply bg-cream-50 text-ink-900 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif font-bold tracking-tight text-ink-900;
+  }
+
+  em {
+    @apply font-serif italic text-pink-500 not-italic;
+  }
+}
+
+.markdown-body {
+  @apply prose prose-neutral max-w-none;
+}
+
+.markdown-body h3 {
+  @apply font-serif italic text-pink-700 mt-6 mb-2 border-b border-pink-100 pb-2;
+}
+
+.markdown-body ul {
+  @apply list-disc list-inside space-y-2 text-ink-700;
+}
+
+.markdown-body strong {
+  @apply text-pink-600 font-semibold;
+}
