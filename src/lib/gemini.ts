@@ -50,29 +50,40 @@ export async function generatePlatformImage(prompt: string, aspectRatio: string)
   return null;
 }
 
-export async function generateScriptWorkup(productInfo: string, targetAudience: string) {
+export async function generateScriptWorkup(productInfo: string, targetAudience: string, scriptType: string = "Review") {
   const prompt = `
     You are a viral TikTok Shop Affiliate expert.
     Analyze this product: "${productInfo}" for this target audience: "${targetAudience}".
 
-    Provide:
-    1. A detailed workup of consumer PAINS this product solves and corresponding SOLUTIONS.
-    2. A brief overview of the product and brand vibe.
-    3. 5 viral HOOKS. For each hook provide:
+    First, provide a detailed AI Strategic Analysis (the workup) of consumer PAINS this product solves and corresponding SOLUTIONS.
+
+    Then, generate 5 DIFFERENT OPTIONS for a viral "${scriptType}" video.
+    Each of the 5 options must be complete and include:
+    1. A Scroll-Stopping HOOK with:
        - Visual: What we see in the first 2 seconds.
        - TOS: Text on Screen overlay.
        - Verbal: Exactly what is said.
-    4. 5 DIFFERENT types of video scripts: GRWM/OOTD, Storytelling, Unboxing, Review, and Tutorial. Ensure each script is high-converting and follows the specific format of its category.
-    5. 5 trending and appropriate hashtags for TikTok SEO.
-    6. 5 SEO-optimized captions for TikTok.
+    2. A high-converting SCRIPT that flows perfectly from the hook. 
+       - Include both Visual (V) and Verbal (A) cues.
+       - Format it clearly.
+    3. An SEO-optimized CAPTION for TikTok.
+    4. 5 trending and appropriate HASHTAGS.
 
     Return the result in JSON format with this structure:
     {
-      "workup": "A comprehensive markdown summary of pains, solutions, and brand vibe. Use H3 headers (###), bullet points, and bold text for a clean, professional look. Do not return one long paragraph.",
-      "hooks": [{"visual": "string", "tos": "string", "verbal": "string"}],
-      "scripts": [{"type": "string", "title": "string", "content": "string"}],
-      "hashtags": ["string"],
-      "captions": ["string"]
+      "workup": "A comprehensive markdown summary of pains, solutions, and brand vibe. Use H3 headers (###), bullet points, and bold text for a clean, professional look. Format it like a high-level strategic analysis.",
+      "options": [
+        {
+          "hook": {
+            "visual": "string",
+            "tos": "string",
+            "verbal": "string"
+          },
+          "script": "string (the full script content)",
+          "caption": "string",
+          "hashtags": ["string"]
+        }
+      ]
     }
   `;
 
@@ -86,40 +97,36 @@ export async function generateScriptWorkup(productInfo: string, targetAudience: 
           type: Type.OBJECT,
           properties: {
             workup: { type: Type.STRING },
-            hooks: {
+            options: {
               type: Type.ARRAY,
+              minItems: 5,
+              maxItems: 5,
               items: {
                 type: Type.OBJECT,
                 properties: {
-                  visual: { type: Type.STRING },
-                  tos: { type: Type.STRING },
-                  verbal: { type: Type.STRING }
+                  hook: {
+                    type: Type.OBJECT,
+                    properties: {
+                      visual: { type: Type.STRING },
+                      tos: { type: Type.STRING },
+                      verbal: { type: Type.STRING }
+                    },
+                    required: ["visual", "tos", "verbal"]
+                  },
+                  script: { type: Type.STRING },
+                  caption: { type: Type.STRING },
+                  hashtags: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    minItems: 5,
+                    maxItems: 5
+                  }
                 },
-                required: ["visual", "tos", "verbal"]
+                required: ["hook", "script", "caption", "hashtags"]
               }
-            },
-            scripts: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  type: { type: Type.STRING },
-                  title: { type: Type.STRING },
-                  content: { type: Type.STRING }
-                },
-                required: ["type", "title", "content"]
-              }
-            },
-            hashtags: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
-            },
-            captions: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
             }
           },
-          required: ["workup", "hooks", "scripts", "hashtags", "captions"]
+          required: ["workup", "options"]
         }
       },
     });

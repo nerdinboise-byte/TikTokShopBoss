@@ -3,15 +3,16 @@ import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, query, where, getDocs, deleteDoc, doc, orderBy } from 'firebase/firestore';
 import { Script, Product } from '../types';
 import { 
-  Archive, 
+  Package, 
   Search, 
-  Trash2, 
+  X, 
   Video, 
   Calendar, 
   ChevronRight,
   Filter,
   Sparkles,
-  MessageSquare
+  MessageSquare,
+  Plus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -186,7 +187,7 @@ export const Warehouse: React.FC = () => {
                   </div>
                     <div className="flex items-center gap-2">
                        <button onClick={(e) => handleDelete(item.id, e)} className={`p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${selectedItem?.id === item.id ? 'hover:bg-white/20 text-white' : 'hover:bg-red-50 text-red-400'}`}>
-                         <Trash2 className="w-3.5 h-3.5" />
+                         <X className="w-3.5 h-3.5" />
                        </button>
                        <ChevronRight className={`w-4 h-4 ${selectedItem?.id === item.id ? 'text-white' : 'text-ink-200'}`} />
                     </div>
@@ -196,7 +197,7 @@ export const Warehouse: React.FC = () => {
             ))}
             {filteredItems.length === 0 && !loading && (
               <div className="text-center py-20 bg-cream-50/50 rounded-[40px] border border-dashed border-pink-100">
-                <Archive className="w-12 h-12 mx-auto mb-4 text-pink-100" />
+                <Package className="w-12 h-12 mx-auto mb-4 text-pink-100" />
                 <p className="text-sm font-serif italic text-ink-300">The warehouse is empty.</p>
               </div>
             )}
@@ -263,7 +264,7 @@ export const Warehouse: React.FC = () => {
               </motion.div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center p-10 bg-cream-50/50 rounded-[40px] border border-dashed border-pink-100 min-h-[500px]">
-                <Archive className="w-20 h-20 text-pink-100 mb-6" />
+                <Package className="w-20 h-20 text-pink-100 mb-6" />
                 <h3 className="text-2xl font-bold font-serif italic text-ink-300">Select an Item</h3>
                 <p className="text-sm text-ink-300 max-w-xs mt-2 font-medium">Revisit your best hooks and scripts to scale your results.</p>
               </div>

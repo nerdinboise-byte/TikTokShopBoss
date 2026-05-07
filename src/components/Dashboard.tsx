@@ -20,9 +20,10 @@ import { WeeklyReview } from './WeeklyReview';
 
 interface DashboardProps {
   onUpdate?: (uid: string) => void;
+  onTabChange?: (tab: 'dashboard' | 'planner' | 'deals' | 'studio' | 'products' | 'warehouse' | 'financials') => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ onUpdate }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ onUpdate, onTabChange }) => {
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [goals, setGoals] = useState<GoalSet | null>(null);
@@ -235,6 +236,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onUpdate }) => {
            </div>
            
            <button 
+             onClick={() => onTabChange?.('products')}
              className="w-full mt-8 py-3 text-pink-600 font-bold text-sm hover:underline"
            >
               Manage products →

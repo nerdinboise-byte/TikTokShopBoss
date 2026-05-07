@@ -16,6 +16,7 @@ import { Planner } from './components/Planner';
 import { BrandDeals } from './components/BrandDeals';
 import { ProductCatalog } from './components/ProductCatalog';
 import { Warehouse } from './components/Warehouse';
+import { GuidedTour } from './components/GuidedTour';
 import { LogIn, Loader2, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DailyLog, GoalSet } from './types';
@@ -24,6 +25,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isNewUser, setIsNewUser] = useState(false);
+  const [showTour, setShowTour] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'planner' | 'deals' | 'studio' | 'products' | 'warehouse' | 'financials'>('dashboard');
   
   // App-level state for sync
@@ -140,35 +142,48 @@ export default function App() {
   }
 
   if (isNewUser) {
-    return <Onboarding user={user} onComplete={() => setIsNewUser(false)} />;
+    return <Onboarding user={user} onComplete={() => {
+      setIsNewUser(false);
+      setShowTour(true);
+    }} />;
   }
 
   return (
-    <Layout 
-      user={user} 
-      activeTab={activeTab} 
-      onTabChange={setActiveTab}
-      stats={stats}
-      goals={goals}
-    >
-      <AnimatePresence mode="wait">
-        <motion.div
-           key={activeTab}
-           initial={{ opacity: 0, x: 20 }}
-           animate={{ opacity: 1, x: 0 }}
-           exit={{ opacity: 0, x: -20 }}
-           transition={{ duration: 0.2 }}
-        >
-          {activeTab === 'dashboard' && <Dashboard onUpdate={fetchSyncData} />}
-          {activeTab === 'planner' && <Planner onUpdate={fetchSyncData} />}
-          {activeTab === 'deals' && <BrandDeals />}
-          {activeTab === 'products' && <ProductCatalog />}
-          {activeTab === 'studio' && <AIStudio />}
-          {activeTab === 'warehouse' && <Warehouse />}
-          {activeTab === 'financials' && <Financials onUpdate={fetchSyncData} />}
-        </motion.div>
-      </AnimatePresence>
-    </Layout>
+    <div className="relative min-h-screen bg-neutral-50">
+      {showTour && (
+        <GuidedTour 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab} 
+          onComplete={() => setShowTour(false)} 
+        />
+      )}
+      <Layout 
+        user={user} 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        stats={stats}
+        goals={goals}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+             key={activeTab}
+             initial={{ opacity: 0, x: 20 }}
+             animate={{ opacity: 1, x: 0 }}
+             exit={{ opacity: 0, x: -20 }}
+             transition={{ duration: 0.2 }}
+          >
+            {activeTab === 'dashboard' && <Dashboard onUpdate={fetchSyncData} onTabChange={setActiveTab} />}
+            {activeTab === 'planner' && <Planner onUpdate={fetchSyncData} />}
+            {activeTab === 'deals' && <BrandDeals />}
+            {activeTab === 'products' && <ProductCatalog />}
+            {activeTab === 'studio' && <AIStudio />}
+            {activeTab === 'warehouse' && <Warehouse />}
+            {activeTab === 'financials' && <Financials onUpdate={fetchSyncData} />}
+          </motion.div>
+        </AnimatePresence>
+      </Layout>
+    </div>
   );
 }
+
 

@@ -8,7 +8,6 @@ import {
   Search, 
   Filter, 
   ExternalLink,
-  Trash2,
   CheckCircle2,
   Clock,
   Handshake,
@@ -151,7 +150,7 @@ export const BrandDeals: React.FC = () => {
                   {deal.status.replace('_', ' ')}
                 </div>
                 <button onClick={() => deleteDeal(deal.id)} className="text-pink-100 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-2 rounded-full hover:bg-red-50">
-                  <Trash2 className="w-4 h-4" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 

@@ -4,7 +4,7 @@ import { collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc, 
 import { Expense, DailyLog, UserProfile, Product, IncomeEntry, WeeklyBudget } from '../types';
 import { 
   Plus, 
-  Trash2, 
+  X, 
   Calculator, 
   ArrowUpRight, 
   Receipt,
@@ -13,7 +13,6 @@ import {
   DollarSign,
   ShieldCheck,
   TrendingUp,
-  X,
   FileText,
   Target,
   PieChart,
@@ -419,7 +418,7 @@ export const Financials: React.FC<FinancialsProps> = ({ onUpdate }) => {
                       </td>
                       <td className="px-10 py-5">
                         <button onClick={() => deleteExpense(e.id)} className="text-ink-100 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-2 rounded-full hover:bg-red-50">
-                          <Trash2 className="w-4 h-4" />
+                          <X className="w-4 h-4" />
                         </button>
                       </td>
                     </tr>

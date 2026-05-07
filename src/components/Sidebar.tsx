@@ -80,6 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user, activeTab, onTabChange, 
                 onTabChange(item.id);
                 if (onClose) onClose();
               }}
+              data-tour={`sidebar-${item.id}`}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-left",
                 activeTab === item.id 

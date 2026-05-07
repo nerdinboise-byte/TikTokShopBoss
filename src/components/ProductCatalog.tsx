@@ -5,7 +5,7 @@ import { Product, Script } from '../types';
 import { 
   ShoppingBag, 
   Plus, 
-  Trash2, 
+  X, 
   ExternalLink, 
   Search, 
   ChevronRight,
@@ -252,7 +252,7 @@ export const ProductCatalog: React.FC = () => {
                     </div>
                   </div>
                   <button onClick={() => deleteProduct(selectedProduct.id)} className="p-2 text-ink-200 hover:text-red-500 transition-colors">
-                    <Trash2 className="w-5 h-5" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
@@ -261,17 +261,17 @@ export const ProductCatalog: React.FC = () => {
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-ink-400 flex items-center gap-2">
                       <FileText className="w-3 h-3" /> Product Specs
                     </h4>
-                    <p className="text-sm text-ink-700 leading-relaxed bg-cream-50 p-6 rounded-3xl border border-cream-100">
-                      {selectedProduct.description || "No description provided."}
-                    </p>
+                    <div className="text-sm text-ink-700 leading-relaxed bg-cream-50 p-6 rounded-3xl border border-cream-100 prose prose-neutral prose-sm max-w-none">
+                      <ReactMarkdown>{selectedProduct.description || "No description provided."}</ReactMarkdown>
+                    </div>
                   </div>
                   <div className="space-y-4">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-ink-400 flex items-center gap-2">
                       <Target className="w-3 h-3" /> Target Audience
                     </h4>
-                    <p className="text-sm text-pink-600 leading-relaxed bg-pink-50/50 p-6 rounded-3xl italic font-serif border border-pink-50">
-                      {selectedProduct.targetAudience || "No target audience defined."}
-                    </p>
+                    <div className="text-sm text-pink-600 leading-relaxed bg-pink-50/50 p-6 rounded-3xl italic font-serif border border-pink-50 prose prose-pink prose-sm max-w-none">
+                      <ReactMarkdown>{selectedProduct.targetAudience || "No target audience defined."}</ReactMarkdown>
+                    </div>
                   </div>
                 </div>
 
@@ -349,7 +349,7 @@ export const ProductCatalog: React.FC = () => {
                                className="p-2 text-ink-100 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                                title="Delete Permanent"
                              >
-                                <Trash2 className="w-4 h-4" />
+                                <X className="w-4 h-4" />
                              </button>
                              <span className="text-[10px] px-2 py-1 bg-neutral-100 rounded-lg font-bold text-neutral-500 uppercase tracking-widest">{script.type}</span>
                           </div>
@@ -407,13 +407,13 @@ export const ProductCatalog: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2 block">Value Proposition / Specs</label>
-                  <textarea rows={3} value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} placeholder="Tell the AI what makes this product great..." className="w-full bg-neutral-50 rounded-2xl py-4 px-4 border-none focus:ring-2 focus:ring-neutral-200 resize-none" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2 block">Value Proposition / Specs (Markdown supported)</label>
+                  <textarea rows={3} value={newProduct.description} onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })} placeholder="Tell the AI what makes this product great. Use ## for headers, * for bullets." className="w-full bg-neutral-50 rounded-2xl py-4 px-4 border-none focus:ring-2 focus:ring-neutral-200 resize-none" />
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2 block">Target Audience</label>
-                  <input type="text" value={newProduct.targetAudience} onChange={(e) => setNewProduct({ ...newProduct, targetAudience: e.target.value })} placeholder="e.g. Tech enthusiasts, content creators" className="w-full bg-neutral-50 rounded-2xl py-4 px-4 border-none focus:ring-2 focus:ring-neutral-200" />
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2 block">Target Audience (Markdown supported)</label>
+                  <input type="text" value={newProduct.targetAudience} onChange={(e) => setNewProduct({ ...newProduct, targetAudience: e.target.value })} placeholder="e.g. ## Busy moms, ## Content creators" className="w-full bg-neutral-50 rounded-2xl py-4 px-4 border-none focus:ring-2 focus:ring-neutral-200" />
                 </div>
 
                 <div className="flex gap-3 pt-6">

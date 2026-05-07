@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
-import { collection, query, where, getDocs, setDoc, doc, serverTimestamp, orderBy, limit, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, setDoc, doc, serverTimestamp, orderBy, limit, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { DailyLog, GoalSet, Script, Product } from '../types';
 import { 
   Calendar as CalendarIcon, 
@@ -14,10 +14,9 @@ import {
   ChevronRight,
   TrendingUp,
   Award,
-  Archive,
+  Package,
   Search,
   Plus,
-  Trash2,
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -189,11 +188,14 @@ export const Planner: React.FC<PlannerProps> = ({ onUpdate }) => {
     const user = auth.currentUser;
     if (!user) return;
     try {
-      const q = query(collection(db, 'scripts'), where('userId', '==', user.uid), where('savedToArchive', '==', true));
+      // Fetch all scripts for user to ensure we find everything, then filter in memory
+      const q = query(collection(db, 'scripts'), where('userId', '==', user.uid));
       const snap = await getDocs(q);
-      setArchiveScripts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Script)));
+      const allScripts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Script));
+      // Filter for archived or unscheduled scripts
+      setArchiveScripts(allScripts.filter(s => s.savedToArchive || !s.scheduledDate));
     } catch (error) {
-      console.error(error);
+      console.error("Archive fetch error:", error);
     }
   };
 
@@ -234,7 +236,9 @@ export const Planner: React.FC<PlannerProps> = ({ onUpdate }) => {
             <CalendarIcon className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold font-serif tracking-tight">Daily Spread</h2>
+            <h2 className="text-3xl font-bold font-serif tracking-tight">
+              {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </h2>
             <p className="text-[10px] font-bold uppercase tracking-widest text-pink-400">Map your moves. Track your wins.</p>
           </div>
         </div>
@@ -256,7 +260,6 @@ export const Planner: React.FC<PlannerProps> = ({ onUpdate }) => {
               <small className="text-[10px] font-bold uppercase tracking-widest text-ink-400">Page 1</small>
               <h3 className="text-2xl font-bold font-serif italic text-ink-900">Daily CEO & Sales</h3>
             </div>
-            <div className="px-4 py-2 bg-pink-50 rounded-full text-xs font-bold text-pink-600">Day {logs.length + 1}</div>
           </header>
 
           <section className="space-y-6">
@@ -341,7 +344,7 @@ export const Planner: React.FC<PlannerProps> = ({ onUpdate }) => {
           </header>
 
           <section className="space-y-6">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-ink-400 border-b border-pink-50 pb-2">Today's Content Pipeline</h4>
+            <h4 className="text-xs font-bold uppercase tracking-widest text-ink-400 border-b border-pink-50 pb-2">Videos to shoot</h4>
             <div className="space-y-4">
                {scheduledScripts.map(script => (
                  <div key={script.id} className="p-5 bg-cream-50 rounded-2xl border border-cream-200 flex items-center justify-between group">
@@ -371,7 +374,7 @@ export const Planner: React.FC<PlannerProps> = ({ onUpdate }) => {
                         <div className={`w-2 h-2 rounded-full ${script.videoUrl ? 'bg-emerald-400' : 'bg-pink-200'}`} title={script.videoUrl ? 'Synced' : 'Draft'} />
                      </div>
                      <button onClick={() => removeScriptFromDay(script.id)} className="p-2 text-ink-200 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                       <Trash2 className="w-4 h-4" />
+                       <X className="w-4 h-4" />
                      </button>
                    </div>
                  </div>
@@ -400,26 +403,6 @@ export const Planner: React.FC<PlannerProps> = ({ onUpdate }) => {
                    />
                 </div>
               ))}
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-ink-400 border-b border-pink-50 pb-2">Live Plan Snapshot 🎬</h4>
-            <div className="grid grid-cols-1 gap-4">
-               <input 
-                 type="text" 
-                 value={log.livePlan?.offer || ''}
-                 onChange={(e) => updateLivePlan('offer', e.target.value)}
-                 placeholder="Main Product / Offer"
-                 className="w-full bg-pink-50/30 rounded-xl px-4 py-3 text-sm font-bold text-pink-600 border border-pink-100 focus:ring-2 focus:ring-pink-100"
-               />
-               <textarea 
-                 rows={3}
-                 value={log.livePlan?.sequence || ''}
-                 onChange={(e) => updateLivePlan('sequence', e.target.value)}
-                 placeholder="Opening Hook / Sequence"
-                 className="w-full bg-pink-50/30 rounded-xl px-4 py-3 text-sm italic font-serif text-pink-600 border border-pink-100 focus:ring-2 focus:ring-pink-100"
-               />
             </div>
           </section>
         </article>
@@ -459,7 +442,10 @@ export const Planner: React.FC<PlannerProps> = ({ onUpdate }) => {
               </div>
 
               <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-                {archiveScripts.filter(s => s.title.toLowerCase().includes(searchQuery.toLowerCase())).map(script => (
+                {archiveScripts.filter(s => 
+                  s.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                  s.content.toLowerCase().includes(searchQuery.toLowerCase())
+                ).map(script => (
                   <div key={script.id} className="p-6 bg-neutral-50 rounded-3xl border border-neutral-100 flex items-center justify-between group hover:border-neutral-300 transition-all">
                     <div className="flex-1 min-w-0 mr-4">
                       <h4 className="text-sm font-bold truncate">{script.title}</h4>
