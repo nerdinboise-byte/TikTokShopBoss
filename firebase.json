@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "myshopboss",
     "public": "dist",
     "ignore": [
       "firebase.json",
