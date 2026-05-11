@@ -1,6 +1,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import Anthropic from "@anthropic-ai/sdk";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY as string,
+  dangerouslyAllowBrowser: true,
+});
 
 export const contentGeneratorModel = "gemini-3-flash-preview";
 export const imageGeneratorModel = "gemini-2.5-flash-image";
@@ -88,63 +93,30 @@ export async function generateScriptWorkup(productInfo: string, targetAudience: 
   `;
 
   try {
-    const response = await ai.models.generateContent({
-      model: contentGeneratorModel,
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            workup: { type: Type.STRING },
-            options: {
-              type: Type.ARRAY,
-              minItems: 5,
-              maxItems: 5,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  hook: {
-                    type: Type.OBJECT,
-                    properties: {
-                      visual: { type: Type.STRING },
-                      tos: { type: Type.STRING },
-                      verbal: { type: Type.STRING }
-                    },
-                    required: ["visual", "tos", "verbal"]
-                  },
-                  script: { type: Type.STRING },
-                  caption: { type: Type.STRING },
-                  hashtags: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    minItems: 5,
-                    maxItems: 5
-                  }
-                },
-                required: ["hook", "script", "caption", "hashtags"]
-              }
-            }
-          },
-          required: ["workup", "options"]
-        }
-      },
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 8096,
+      messages: [
+        {
+          role: "user",
+          content: prompt + "\n\nReturn ONLY valid JSON with no markdown code blocks.",
+        },
+      ],
     });
 
-    if (!response.text) return {};
+    const block = response.content[0];
+    if (block.type !== "text") return {};
 
-    let cleanedText = response.text.trim();
-    // Remove potential markdown code blocks if the model includes them despite JSON mode
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\n?/, '').replace(/\n?```$/, '');
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\n?/, '').replace(/\n?```$/, '');
+    let cleanedText = block.text.trim();
+    if (cleanedText.startsWith("```json")) {
+      cleanedText = cleanedText.replace(/^```json\n?/, "").replace(/\n?```$/, "");
+    } else if (cleanedText.startsWith("```")) {
+      cleanedText = cleanedText.replace(/^```\n?/, "").replace(/\n?```$/, "");
     }
 
     return JSON.parse(cleanedText);
   } catch (error) {
     console.error("AI Generation or Parse Error:", error);
-    // Return a structured fallback if parsing fails
     return {
       workup: "Error generating content. The response was too large or malformed.",
       hooks: [],
